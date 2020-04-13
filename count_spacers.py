@@ -7,8 +7,8 @@ import numpy as np
 import sys
 import argparse
 
-KEY_REGION_START = 30 #start index of key region
-KEY_REGION_END = 55 #end index of key region
+KEY_REGION_START = 18 #start index of key region
+KEY_REGION_END = 50 #end index of key region
 KEY = "CGAAACACC" #identifies sequence before guide to determine guide position
 
 def count_spacers(input_file, fastq_file, output_file, guide_g): 
@@ -35,13 +35,13 @@ def count_spacers(input_file, fastq_file, output_file, guide_g):
 			reader = csv.reader(infile)
 			dictionary = {rows[0]:0 for rows in reader}
 	except:
-		print  'could not open', input_file
+		print('could not open', input_file)
 	  
 	# open fastq file
 	try:
 		handle = open(fastq_file, "rU")
 	except:
-		print "could not find fastq file"
+		print ("could not find fastq file")
 		return
 
 	# process reads in fastq file
@@ -63,7 +63,7 @@ def count_spacers(input_file, fastq_file, output_file, guide_g):
 			key_not_found += 1
 
 	# create ordered dictionary with guides and respective counts and output as a csv file                      
-	dict_sorted = OrderedDict(sorted(dictionary.items(), key=lambda t: t[0]))
+	dict_sorted = OrderedDict(sorted(list(dictionary.items()), key=lambda t: t[0]))
 	with open(output_file, 'w') as csvfile:
 		mywriter = csv.writer(csvfile, delimiter=',')
 		for guide in dict_sorted:
@@ -73,19 +73,19 @@ def count_spacers(input_file, fastq_file, output_file, guide_g):
 	# percentage of guides that matched perfectly
 	percent_matched = round(perfect_matches/float(perfect_matches + non_perfect_matches) * 100, 1)
 	# percentage of undetected guides with no read counts
-	guides_with_reads = np.count_nonzero(dictionary.values())
-	guides_no_reads = len(dictionary.values()) - guides_with_reads
+	guides_with_reads = np.count_nonzero(list(dictionary.values()))
+	guides_no_reads = len(list(dictionary.values())) - guides_with_reads
 	percent_no_reads = round(guides_no_reads/float(len(dictionary.values())) * 100, 1)
 	# skew ratio of top 10% to bottom 10% of guide counts
-	top_10 = np.percentile(dictionary.values(), 90)
-	bottom_10 = np.percentile(dictionary.values(), 10)
+	top_10 = np.percentile(list(dictionary.values()), 90)
+	bottom_10 = np.percentile(list(dictionary.values()), 10)
 	if top_10 != 0 and bottom_10 != 0:
 		skew_ratio = top_10/bottom_10
 	else:
 		skew_ratio = 'Not enough perfect matches to determine skew ratio'
 
 	# write analysis statistics to statistics.txt
-	with open('statistics.txt', 'w') as infile:
+	with open(output_file + '_statistics.txt', 'w') as infile:
 		infile.write('Number of perfect guide matches: ' + str(perfect_matches) + '\n')
 		infile.write('Number of nonperfect guide matches: ' + str(non_perfect_matches) + '\n')
 		infile.write('Number of reads where key was not found: ' + str(key_not_found) + '\n')
