@@ -7,6 +7,9 @@ import numpy as np
 import sys
 import argparse
 
+from tqdm import tqdm
+
+
 KEY_REGION_START = 18 #start index of key region
 KEY_REGION_END = 50 #end index of key region
 KEY = "CGAAACACC" #identifies sequence before guide to determine guide position
@@ -46,7 +49,7 @@ def count_spacers(input_file, fastq_file, output_file, guide_g):
 
 	# process reads in fastq file
 	readiter = SeqIO.parse(handle, "fastq")
-	for record in readiter: #contains the seq and Qscore etc.
+	for record in tqdm(readiter): #contains the seq and Qscore etc.
 		num_reads += 1
 		read_sequence = str.upper(str(record.seq))
 		key_region = read_sequence[KEY_REGION_START:KEY_REGION_END]
@@ -66,7 +69,7 @@ def count_spacers(input_file, fastq_file, output_file, guide_g):
 	dict_sorted = OrderedDict(sorted(list(dictionary.items()), key=lambda t: t[0]))
 	with open(output_file, 'w') as csvfile:
 		mywriter = csv.writer(csvfile, delimiter=',')
-		for guide in dict_sorted:
+		for guide in tqdm(dict_sorted):
 			count = dict_sorted[guide]
 			mywriter.writerow([guide,count])
 
